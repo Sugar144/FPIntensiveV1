@@ -1,0 +1,6 @@
+ENUMERATED TYPES
+
+An enumerated type defines a fixed set of named values that represent
+meaningful options.
+
+Internally, enumerated values are represented as integers.

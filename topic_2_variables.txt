@@ -1,0 +1,7 @@
+VARIABLES AND CONSTANTS
+
+A variable is a named object that allows a program to store and access
+a value in memory.
+
+Variables have a name, a type and a value that can change during
+program execution.

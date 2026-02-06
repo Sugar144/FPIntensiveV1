@@ -1,0 +1,6 @@
+EXPRESSIONS
+
+An expression is a combination of values, variables and operators
+that produces a result.
+
+Expressions are evaluated to compute new values.

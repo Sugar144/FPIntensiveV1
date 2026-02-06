@@ -1,0 +1,7 @@
+PRIMITIVE DATA TYPES
+
+In C, primitive data types represent basic kinds of data.
+Examples include integers, real numbers and characters.
+
+These types are used to store simple values and are the foundation
+of all programs.
