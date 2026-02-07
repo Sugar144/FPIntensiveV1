@@ -1,160 +1,301 @@
-#include <stdio.h>      // Funciones de entrada y salida estándar (printf, scanf, fopen, etc.)
-#include <string.h>     // Funciones básicas para trabajar con texto (strlen, strcpy)
-#include <stdbool.h>    // Tipo booleano (true / false)
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
 
+/* ===== CONSTANTES ===== */
 
-/* Tamaño máximo de una línea de texto que se leerá del fichero */
-#define MAX_LINE 514+1
+#define MAX_TOPICS 5
+#define MAX_EXAMPLES 10
+#define MAX_LINES 50
+#define MAX_LINE 514
+#define MAX_TITLE 100
 
-/* Tamaño máximo del nombre del fichero del tema */
-#define MAX_FILENAME 25+1
+/* ===== TIPOS ===== */
 
-/* 
- * Enumerado que representa las opciones del menú principal.
- * Cada valor corresponde a una opción que el usuario puede seleccionar.
- */
-typedef enum {
-    TOPIC_TYPES = 1,
-    TOPIC_VARIABLES,
-    TOPIC_ENUMS,
-    TOPIC_EXPRESSIONS,
-    EXIT 
-} tMainOption;
+typedef struct {
+    char description[MAX_LINES][MAX_LINE];
+    int nDescriptionLines;
 
+    char pseudocode[MAX_LINES][MAX_LINE];
+    int nPseudocodeLines;
+
+    char cCode[MAX_LINES][MAX_LINE];
+    int nCLines;
+
+    char title[MAX_TITLE];
+} tExample;
+
+typedef struct {
+    char title[MAX_TITLE];
+    tExample examples[MAX_EXAMPLES];
+    int nExamples;
+} tTopic;
+
+/* ===== MAIN ===== */
 
 int main(int argc, char **argv)
 {
-    /* Variable para leer la opción introducida por el usuario (como número) */
-    int optionInt;
+    tTopic topics[MAX_TOPICS];
+    int nTopics;
 
-    /* Variable del tipo enumerado para trabajar con opciones de forma más clara */
-    tMainOption option;
-    
-    /* Nombre del fichero que contiene el contenido del tema seleccionado */
-    char fileName[MAX_FILENAME];
-
-    /* Buffer de texto donde se guardará la línea leída del fichero */
+    FILE *fin;
+    char fileName[MAX_TITLE];
     char line[MAX_LINE];
 
-    /* Puntero a fichero para acceder al archivo de texto */
-    FILE *fin;
+    int topicIndex;
+    int exampleIndex;
+    int optionInt;
 
-    /* 
-     * Variables de control del flujo del programa.
-     * Se utilizan para evitar múltiples puntos de salida (return).
-     */
-    bool validOption;     // Indica si la opción introducida es válida
-    bool mustLoadFile;   // Indica si se debe cargar un fichero o no
+    bool exitProgram;
 
-    /* Estado inicial del programa */
-    validOption = true;
-    mustLoadFile = false;
-    
-    
-    /* 1) Mostrar el menú principal */
-    printf("==== LEARNING MOTOR (Sprint 1) ====\n");
-    printf("1) Primitive data types\n");
-    printf("2) Variables and constants\n");
-    printf("3) Enumerated types\n");
-    printf("4) Expressions\n");
-    printf("5) Exit\n");
-    printf("Select option >> \n");
-    
-    scanf("%d", &optionInt);
-    
-    /* Leer la opción introducida por el usuario */
-    if ( optionInt < 1 || optionInt > 5) {
-        
-        /* Si la lectura falla, se marca la opción como no válida */
-        printf("Invalid input\n");
-        validOption = false;
-        
-     } else {
+    /* ===== Inicialización ===== */
 
-        /* Consumir el salto de línea que queda en el buffer de entrada.
-           Esto evita problemas en lecturas posteriores.*/
-        getchar();
+    nTopics = 0;
+    exitProgram = false;
 
-        /* Convertir el número leído a una opción del enumerado */
-        option = (tMainOption)optionInt;
-        
-        
-        /* 2) Decidir qué hacer según la opción seleccionada */
-        switch (option) {
+    printf("LOAD TOPICS FROM FILE >> ");
+    scanf("%s", fileName);
+    getchar(); /* consumir salto de línea */
 
-            case TOPIC_TYPES:
-                /* Asociar la opción con el fichero del tema correspondiente */
-                strcpy(fileName, "topic_1_types.txt");
-                mustLoadFile = true;   // Se deberá cargar el fichero
-                break;
+    fin = fopen(fileName, "r");
 
-            case TOPIC_VARIABLES:
-                strcpy(fileName, "topic_2_variables.txt");
-                mustLoadFile = true;
-                break;
+    if (fin == NULL) {
 
-            case TOPIC_ENUMS:
-                strcpy(fileName, "topic_3_enums.txt");
-                mustLoadFile = true;
-                break;
+        printf("ERROR: unable to open file\n");
 
-            case TOPIC_EXPRESSIONS:
-                strcpy(fileName, "topic_4_expressions.txt");
-                mustLoadFile = true;
-                break;
+    } else {
 
-            case EXIT:
-                /* Si el usuario elige salir, no se carga ningún fichero */
-                printf("Bye!\n");
-                mustLoadFile = false;
-                break;
+        /* ===== LECTURA COMPLETA DEL FICHERO ===== */
 
-            default:
-                /* Opción no válida */
-                printf("Invalid option\n");
-                validOption = false;
-                mustLoadFile = false;
-                break;
-        }
-        
-     }
-     
-     /* 3) Cargar el contenido del fichero y mostrarlo */
-    /* Solo se entra aquí si la opción es válida y hay que cargar fichero */
-    if (validOption == true && mustLoadFile == true) {
+        while (!feof(fin)) {
 
-        /* Abrir el fichero en modo lectura */
-        fin = fopen(fileName, "r");
+            line[0] = '\0';
+            fgets(line, MAX_LINE - 1, fin);
+            line[MAX_LINE - 1] = '\0';
 
-        if (fin == NULL) {
-            /* Si el fichero no se puede abrir, se muestra un error */
-            printf("ERROR: unable to open topic file\n");
-        } else {
+            if (strlen(line) > 0 && line[strlen(line) - 1] == '\n') {
+                line[strlen(line) - 1] = '\0';
+            }
 
-            /* 
-             * Leer una única línea del fichero.
-             * En Sprint 1 NO se usan bucles, por lo que solo se realiza una lectura.
-             */
-            line[0] = '\0';                  // Inicializar el buffer como cadena vacía
-            fgets(line, MAX_LINE - 1, fin);  // Leer una línea del fichero
-            line[MAX_LINE - 1] = '\0';       // Garantizar fin de cadena
+            if (strcmp(line, "TOPIC") == 0) {
 
-            /* Cerrar el fichero */
-            fclose(fin);
+                nTopics = nTopics + 1;
 
-            /* Comprobar si se ha leído contenido */
-            if (strlen(line) > 0) {
-                /* Mostrar el contenido leído */
-                printf("\n---- CONTENT ----\n");
-                printf("%s", line);
-                printf("\n-----------------\n");
-            } else {
-                /* El fichero estaba vacío */
-                printf("ERROR: empty topic file\n");
+                fgets(topics[nTopics].title, MAX_TITLE - 1, fin);
+                topics[nTopics].title[MAX_TITLE - 1] = '\0';
+
+                if (topics[nTopics].title[strlen(topics[nTopics].title) - 1] == '\n') {
+                    topics[nTopics].title[strlen(topics[nTopics].title) - 1] = '\0';
+                }
+
+                topics[nTopics].nExamples = 0;
+
+                fgets(line, MAX_LINE - 1, fin);
+
+                if (line[strlen(line) - 1] == '\n') {
+                    line[strlen(line) - 1] = '\0';
+                }
+
+                while (strcmp(line, "END_TOPIC") != 0 && !feof(fin)) {
+
+                    if (strcmp(line, "EXAMPLE") == 0) {
+
+                        topics[nTopics].nExamples =
+                            topics[nTopics].nExamples + 1;
+
+                        exampleIndex = topics[nTopics].nExamples;
+
+                        fgets(topics[nTopics].examples[exampleIndex].title,
+                              MAX_TITLE - 1, fin);
+
+                        if (topics[nTopics].examples[exampleIndex].title[
+                                strlen(topics[nTopics].examples[exampleIndex].title) - 1] == '\n') {
+
+                            topics[nTopics].examples[exampleIndex].title[
+                                strlen(topics[nTopics].examples[exampleIndex].title) - 1] = '\0';
+                        }
+
+                        /* ===== DESCRIPTION ===== */
+
+                        topics[nTopics].examples[exampleIndex].nDescriptionLines = 0;
+
+                        fgets(line, MAX_LINE - 1, fin);
+
+                        if (line[strlen(line) - 1] == '\n') {
+                            line[strlen(line) - 1] = '\0';
+                        }
+
+                        while (strcmp(line, "END_DESCRIPTION") != 0) {
+
+                            topics[nTopics].examples[exampleIndex].nDescriptionLines =
+                                topics[nTopics].examples[exampleIndex].nDescriptionLines + 1;
+
+                            strcpy(
+                                topics[nTopics].examples[exampleIndex].description[
+                                    topics[nTopics].examples[exampleIndex].nDescriptionLines
+                                ],
+                                line
+                            );
+
+                            fgets(line, MAX_LINE - 1, fin);
+
+                            if (line[strlen(line) - 1] == '\n') {
+                                line[strlen(line) - 1] = '\0';
+                            }
+                        }
+
+                        /* ===== PSEUDOCODE ===== */
+
+                        topics[nTopics].examples[exampleIndex].nPseudocodeLines = 0;
+
+                        fgets(line, MAX_LINE - 1, fin);
+
+                        if (line[strlen(line) - 1] == '\n') {
+                            line[strlen(line) - 1] = '\0';
+                        }
+
+                        while (strcmp(line, "END_PSEUDOCODE") != 0) {
+
+                            topics[nTopics].examples[exampleIndex].nPseudocodeLines =
+                                topics[nTopics].examples[exampleIndex].nPseudocodeLines + 1;
+
+                            strcpy(
+                                topics[nTopics].examples[exampleIndex].pseudocode[
+                                    topics[nTopics].examples[exampleIndex].nPseudocodeLines
+                                ],
+                                line
+                            );
+
+                            fgets(line, MAX_LINE - 1, fin);
+
+                            if (line[strlen(line) - 1] == '\n') {
+                                line[strlen(line) - 1] = '\0';
+                            }
+                        }
+
+                        /* ===== C CODE ===== */
+
+                        topics[nTopics].examples[exampleIndex].nCLines = 0;
+
+                        fgets(line, MAX_LINE - 1, fin);
+
+                        if (line[strlen(line) - 1] == '\n') {
+                            line[strlen(line) - 1] = '\0';
+                        }
+
+                        while (strcmp(line, "END_C") != 0) {
+
+                            topics[nTopics].examples[exampleIndex].nCLines =
+                                topics[nTopics].examples[exampleIndex].nCLines + 1;
+
+                            strcpy(
+                                topics[nTopics].examples[exampleIndex].cCode[
+                                    topics[nTopics].examples[exampleIndex].nCLines
+                                ],
+                                line
+                            );
+
+                            fgets(line, MAX_LINE - 1, fin);
+
+                            if (line[strlen(line) - 1] == '\n') {
+                                line[strlen(line) - 1] = '\0';
+                            }
+                        }
+                    }
+
+                    fgets(line, MAX_LINE - 1, fin);
+
+                    if (line[strlen(line) - 1] == '\n') {
+                        line[strlen(line) - 1] = '\0';
+                    }
+                }
             }
         }
+
+        fclose(fin);
     }
-     
-    
-	return 0;
+
+    /* ===== MENÚ ===== */
+
+    do {
+
+        printf("==== LEARNING MOTOR (Sprint 3) ====\n");
+
+        for (topicIndex = 1; topicIndex <= nTopics; topicIndex++) {
+            printf("%d) %s\n", topicIndex, topics[topicIndex].title);
+        }
+
+        printf("0) Exit\n");
+        scanf("%d", &optionInt);
+
+        if (optionInt == 0) {
+            exitProgram = true;
+        } else {
+
+            if (optionInt >= 1 && optionInt <= nTopics) {
+
+                topicIndex = optionInt;
+
+                for (exampleIndex = 1;
+                     exampleIndex <= topics[topicIndex].nExamples;
+                     exampleIndex++) {
+
+                    printf("%d) %s\n",
+                           exampleIndex,
+                           topics[topicIndex].examples[exampleIndex].title);
+                }
+
+                scanf("%d", &exampleIndex);
+
+                if (exampleIndex >= 1 &&
+                    exampleIndex <= topics[topicIndex].nExamples) {
+
+                    printf("---- DESCRIPTION ----\n");
+
+                    for (optionInt = 1;
+                         optionInt <= topics[topicIndex]
+                                           .examples[exampleIndex]
+                                           .nDescriptionLines;
+                         optionInt++) {
+
+                        printf("%s\n",
+                               topics[topicIndex]
+                                   .examples[exampleIndex]
+                                   .description[optionInt]);
+                    }
+
+                    printf("---- PSEUDOCODE ----\n");
+
+                    for (optionInt = 1;
+                         optionInt <= topics[topicIndex]
+                                           .examples[exampleIndex]
+                                           .nPseudocodeLines;
+                         optionInt++) {
+
+                        printf("%s\n",
+                               topics[topicIndex]
+                                   .examples[exampleIndex]
+                                   .pseudocode[optionInt]);
+                    }
+
+                    printf("---- C CODE ----\n");
+
+                    for (optionInt = 1;
+                         optionInt <= topics[topicIndex]
+                                           .examples[exampleIndex]
+                                           .nCLines;
+                         optionInt++) {
+
+                        printf("%s\n",
+                               topics[topicIndex]
+                                   .examples[exampleIndex]
+                                   .cCode[optionInt]);
+                    }
+                }
+            }
+        }
+
+    } while (exitProgram == false);
+
+    return 0;
 }

@@ -1,0 +1,213 @@
+TOPIC
+Records: basic concepts
+
+EXAMPLE
+Declaring a record
+
+A record groups different data fields into a single structure.
+Each field can have a different data type.
+Records are used to represent real-world entities.
+
+END_DESCRIPTION
+
+type
+    tPerson = record
+        name: string;
+        age: integer;
+    end record
+end type
+
+algorithm example1
+var
+    p: tPerson;
+end var
+end algorithm
+
+END_PSEUDOCODE
+
+typedef struct {
+    char name[25];
+    int age;
+} tPerson;
+
+int main() {
+    tPerson p;
+    return 0;
+}
+
+END_C
+
+EXAMPLE
+Accessing record fields
+
+Fields of a record are accessed using the dot operator.
+Each field can be read or written independently.
+
+END_DESCRIPTION
+
+p.name := "Alice";
+p.age := 30;
+
+END_PSEUDOCODE
+
+strcpy(p.name, "Alice");
+p.age = 30;
+
+END_C
+
+EXAMPLE
+Copying records
+
+In pseudocode, records can be copied directly.
+In C, each field must be copied manually.
+
+END_DESCRIPTION
+
+p2 := p1;
+
+END_PSEUDOCODE
+
+strcpy(p2.name, p1.name);
+p2.age = p1.age;
+
+END_C
+
+END_TOPIC
+
+
+TOPIC
+Records containing arrays
+
+EXAMPLE
+Record with an array field
+
+A record can contain arrays as fields.
+This allows storing multiple related values.
+
+END_DESCRIPTION
+
+type
+    tSubject = record
+        name: string;
+        marks: vector[5] of integer;
+    end record
+end type
+
+END_PSEUDOCODE
+
+typedef struct {
+    char name[25];
+    int marks[5];
+} tSubject;
+
+END_C
+
+EXAMPLE
+Accessing array elements in a record
+
+Array elements inside a record are accessed using index notation.
+
+END_DESCRIPTION
+
+subject.marks[1] := 8;
+
+END_PSEUDOCODE
+
+subject.marks[0] = 8;
+
+END_C
+
+EXAMPLE
+Traversing an array inside a record
+
+Loops can be used to process array fields inside records.
+
+END_DESCRIPTION
+
+i := 1;
+while i <= 5 do
+    writeInteger(subject.marks[i]);
+    i := i + 1;
+end while
+
+END_PSEUDOCODE
+
+for (i = 0; i < 5; i++) {
+    printf("%d\n", subject.marks[i]);
+}
+
+END_C
+
+END_TOPIC
+
+
+TOPIC
+Nested records
+
+EXAMPLE
+Record containing another record
+
+A record field can itself be another record.
+This allows hierarchical data structures.
+
+END_DESCRIPTION
+
+type
+    tDate = record
+        day: integer;
+        month: integer;
+        year: integer;
+    end record
+
+    tPerson = record
+        name: string;
+        birth: tDate;
+    end record
+end type
+
+END_PSEUDOCODE
+
+typedef struct {
+    int day;
+    int month;
+    int year;
+} tDate;
+
+typedef struct {
+    char name[25];
+    tDate birth;
+} tPerson;
+
+END_C
+
+EXAMPLE
+Accessing nested record fields
+
+Nested fields are accessed using multiple dot operators.
+
+END_DESCRIPTION
+
+person.birth.year := 2000;
+
+END_PSEUDOCODE
+
+person.birth.year = 2000;
+
+END_C
+
+EXAMPLE
+Using nested records in algorithms
+
+Nested records help organize complex data clearly.
+
+END_DESCRIPTION
+
+writeInteger(person.birth.day);
+
+END_PSEUDOCODE
+
+printf("%d", person.birth.day);
+
+END_C
+
+END_TOPIC
