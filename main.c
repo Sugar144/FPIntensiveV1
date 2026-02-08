@@ -2,7 +2,9 @@
 #include <string.h>
 #include <stdbool.h>
 
-/* ===== CONSTANTES ===== */
+/*
+ * CONSTANTES
+ */
 
 #define MAX_TOPICS 5
 #define MAX_EXAMPLES 10
@@ -10,11 +12,13 @@
 #define MAX_LINE 514
 #define MAX_TITLE 100
 
-/* ===== TIPOS ===== */
+/*
+ * TIPOS
+ */
 
 typedef struct {
-    char description[MAX_LINES][MAX_LINE];
-    int nDescriptionLines;
+    char description[MAX_LINES][MAX_LINE]; // Array de arrays (Matriz)
+    int nDescriptionLines; // Contador de lineas de descripciones
 
     char pseudocode[MAX_LINES][MAX_LINE];
     int nPseudocodeLines;
@@ -31,31 +35,94 @@ typedef struct {
     int nExamples;
 } tTopic;
 
-/* ===== MAIN ===== */
+/*
+ * MAIN FUNCTION
+ */
 
 int main(int argc, char **argv)
 {
+    /*
+     * topics:
+     * Vector donde se almacenan todos los topics cargados desde el fichero.
+     */
     tTopic topics[MAX_TOPICS];
+
+    /*
+     * nTopics:
+     * Número real de topics cargados.
+     */
     int nTopics;
 
+    /*
+     * fin:
+     * Puntero al fichero de entrada.
+     */
     FILE *fin;
+
+    /*
+     * fileName:
+     * Nombre del fichero introducido por el usuario.
+     */
     char fileName[MAX_TITLE];
+
+    /*
+     * line:
+     * Buffer auxiliar para leer líneas del fichero.
+     */
     char line[MAX_LINE];
 
-    int topicIndex;
-    int exampleIndex;
+    /*
+     * optionInt:
+     * Variable auxiliar para leer opciones de menú.
+     */
     int optionInt;
 
+    /*
+     * currentTopicIndex:
+     * Índice del topic seleccionado.
+     */
+    int currentTopicIndex;
+
+    /*
+     * currentExampleIndex:
+     * Índice del ejemplo seleccionado.
+     */
+    int currentExampleIndex;
+
+    /*
+     * lineIndex:
+     * Índice para recorrer líneas de description, pseudocode y cCode.
+     */
+    int lineIndex;
+
+    /*
+     * lineLength:
+     * Longitud de la línea actualmente leída.
+     */
+    int lineLength;
+
+    /*
+     * titleLength:
+     * Longitud de un título (topic o example).
+     */
+    int titleLength;
+
+    /*
+     * exitProgram:
+     * Controla la salida del menú principal.
+     */
     bool exitProgram;
 
-    /* ===== Inicialización ===== */
+    /*
+     * Inicialización
+     */
 
     nTopics = 0;
     exitProgram = false;
 
     printf("LOAD TOPICS FROM FILE >> ");
     scanf("%s", fileName);
-    getchar(); /* consumir salto de línea */
+    getchar();
 
     fin = fopen(fileName, "r");
 
@@ -65,7 +132,9 @@ int main(int argc, char **argv)
 
     } else {
 
-        /* ===== LECTURA COMPLETA DEL FICHERO ===== */
+        /*
+         * LECTURA COMPLETA DEL FICHERO
+         */
 
         while (!feof(fin)) {
 
@@ -73,8 +142,10 @@ int main(int argc, char **argv)
             fgets(line, MAX_LINE - 1, fin);
             line[MAX_LINE - 1] = '\0';
 
-            if (strlen(line) > 0 && line[strlen(line) - 1] == '\n') {
-                line[strlen(line) - 1] = '\0';
+            lineLength = strlen(line);
+
+            if (lineLength > 0 && line[lineLength - 1] == '\n') {
+                line[lineLength - 1] = '\0';
             }
 
             if (strcmp(line, "TOPIC") == 0) {
@@ -84,129 +155,166 @@ int main(int argc, char **argv)
                 fgets(topics[nTopics].title, MAX_TITLE - 1, fin);
                 topics[nTopics].title[MAX_TITLE - 1] = '\0';
 
-                if (topics[nTopics].title[strlen(topics[nTopics].title) - 1] == '\n') {
-                    topics[nTopics].title[strlen(topics[nTopics].title) - 1] = '\0';
+                titleLength = strlen(topics[nTopics].title);
+
+                if (titleLength > 0 &&
+                    topics[nTopics].title[titleLength - 1] == '\n') {
+
+                    topics[nTopics].title[titleLength - 1] = '\0';
                 }
 
                 topics[nTopics].nExamples = 0;
 
                 fgets(line, MAX_LINE - 1, fin);
 
-                if (line[strlen(line) - 1] == '\n') {
-                    line[strlen(line) - 1] = '\0';
+                lineLength = strlen(line);
+
+                if (lineLength > 0 && line[lineLength - 1] == '\n') {
+                    line[lineLength - 1] = '\0';
                 }
 
                 while (strcmp(line, "END_TOPIC") != 0 && !feof(fin)) {
 
                     if (strcmp(line, "EXAMPLE") == 0) {
 
-                        topics[nTopics].nExamples =
-                            topics[nTopics].nExamples + 1;
+                        topics[nTopics].nExamples = topics[nTopics].nExamples + 1;
 
-                        exampleIndex = topics[nTopics].nExamples;
+                        currentExampleIndex = topics[nTopics].nExamples;
 
-                        fgets(topics[nTopics].examples[exampleIndex].title,
-                              MAX_TITLE - 1, fin);
+                        fgets(topics[nTopics].examples[currentExampleIndex]
+                                  .title, MAX_TITLE - 1,fin);
 
-                        if (topics[nTopics].examples[exampleIndex].title[
-                                strlen(topics[nTopics].examples[exampleIndex].title) - 1] == '\n') {
+                        titleLength = strlen(topics[nTopics].
+                                        examples[currentExampleIndex].title);
 
-                            topics[nTopics].examples[exampleIndex].title[
-                                strlen(topics[nTopics].examples[exampleIndex].title) - 1] = '\0';
+                        if (titleLength > 0 && topics[nTopics]
+                                .examples[currentExampleIndex]
+                                .title[titleLength - 1] == '\n') {
+
+                            topics[nTopics].examples[currentExampleIndex]
+                                .title[titleLength - 1] = '\0';
                         }
 
-                        /* ===== DESCRIPTION ===== */
+                        /*
+                         * DESCRIPTION
+                         */
 
-                        topics[nTopics].examples[exampleIndex].nDescriptionLines = 0;
+                        topics[nTopics].examples[currentExampleIndex].nDescriptionLines = 0;
 
                         fgets(line, MAX_LINE - 1, fin);
 
-                        if (line[strlen(line) - 1] == '\n') {
-                            line[strlen(line) - 1] = '\0';
+                        lineLength = strlen(line);
+
+                        if (lineLength > 0 && line[lineLength - 1] == '\n') {
+                            line[lineLength - 1] = '\0';
                         }
 
                         while (strcmp(line, "END_DESCRIPTION") != 0) {
 
-                            topics[nTopics].examples[exampleIndex].nDescriptionLines =
-                                topics[nTopics].examples[exampleIndex].nDescriptionLines + 1;
+                            topics[nTopics].examples[currentExampleIndex]
+                                .nDescriptionLines = topics[nTopics]
+                                                    .examples[currentExampleIndex]
+                                                    .nDescriptionLines + 1;
 
-                            strcpy(
-                                topics[nTopics].examples[exampleIndex].description[
-                                    topics[nTopics].examples[exampleIndex].nDescriptionLines
-                                ],
-                                line
-                            );
+                            lineIndex = topics[nTopics].examples[currentExampleIndex]
+                                        .nDescriptionLines;
+
+                            strcpy(topics[nTopics].examples[currentExampleIndex]
+                                    .description[lineIndex],line);
 
                             fgets(line, MAX_LINE - 1, fin);
 
-                            if (line[strlen(line) - 1] == '\n') {
-                                line[strlen(line) - 1] = '\0';
+                            lineLength = strlen(line);
+
+                            if (lineLength > 0 && line[lineLength - 1] == '\n') {
+                                line[lineLength - 1] = '\0';
                             }
                         }
 
-                        /* ===== PSEUDOCODE ===== */
+                        /*
+                         * PSEUDOCODE
+                         */
 
-                        topics[nTopics].examples[exampleIndex].nPseudocodeLines = 0;
+                        topics[nTopics].examples[currentExampleIndex]
+                            .nPseudocodeLines = 0;
 
                         fgets(line, MAX_LINE - 1, fin);
 
-                        if (line[strlen(line) - 1] == '\n') {
-                            line[strlen(line) - 1] = '\0';
+                        lineLength = (int)strlen(line);
+
+                        if (lineLength > 0 && line[lineLength - 1] == '\n') {
+                            line[lineLength - 1] = '\0';
                         }
 
                         while (strcmp(line, "END_PSEUDOCODE") != 0) {
 
-                            topics[nTopics].examples[exampleIndex].nPseudocodeLines =
-                                topics[nTopics].examples[exampleIndex].nPseudocodeLines + 1;
+                            topics[nTopics].examples[currentExampleIndex]
+                                .nPseudocodeLines = topics[nTopics]
+                                                    .examples[currentExampleIndex]
+                                                    .nPseudocodeLines + 1;
 
-                            strcpy(
-                                topics[nTopics].examples[exampleIndex].pseudocode[
-                                    topics[nTopics].examples[exampleIndex].nPseudocodeLines
-                                ],
-                                line
-                            );
+                            lineIndex = topics[nTopics]
+                                    .examples[currentExampleIndex]
+                                    .nPseudocodeLines;
+
+                            strcpy(topics[nTopics].examples[currentExampleIndex]
+                                    .pseudocode[lineIndex], line);
 
                             fgets(line, MAX_LINE - 1, fin);
 
-                            if (line[strlen(line) - 1] == '\n') {
-                                line[strlen(line) - 1] = '\0';
+                            lineLength = strlen(line);
+
+                            if (lineLength > 0 &&
+                                line[lineLength - 1] == '\n') {
+                                line[lineLength - 1] = '\0';
                             }
                         }
 
-                        /* ===== C CODE ===== */
+                        /*
+                         * C CODE
+                         */
 
-                        topics[nTopics].examples[exampleIndex].nCLines = 0;
+                        topics[nTopics].examples[currentExampleIndex].nCLines = 0;
 
                         fgets(line, MAX_LINE - 1, fin);
 
-                        if (line[strlen(line) - 1] == '\n') {
-                            line[strlen(line) - 1] = '\0';
+                        lineLength = strlen(line);
+
+                        if (lineLength > 0 && line[lineLength - 1] == '\n') {
+                            line[lineLength - 1] = '\0';
                         }
 
                         while (strcmp(line, "END_C") != 0) {
 
-                            topics[nTopics].examples[exampleIndex].nCLines =
-                                topics[nTopics].examples[exampleIndex].nCLines + 1;
+                            topics[nTopics].examples[currentExampleIndex]
+                                .nCLines = topics[nTopics]
+                                            .examples[currentExampleIndex]
+                                            .nCLines + 1;
 
-                            strcpy(
-                                topics[nTopics].examples[exampleIndex].cCode[
-                                    topics[nTopics].examples[exampleIndex].nCLines
-                                ],
-                                line
-                            );
+                            lineIndex = topics[nTopics]
+                                        .examples[currentExampleIndex]
+                                        .nCLines;
+
+                            strcpy(topics[nTopics].examples[currentExampleIndex]
+                                    .cCode[lineIndex], line);
 
                             fgets(line, MAX_LINE - 1, fin);
 
-                            if (line[strlen(line) - 1] == '\n') {
-                                line[strlen(line) - 1] = '\0';
+                            lineLength = strlen(line);
+
+                            if (lineLength > 0 &&
+                                line[lineLength - 1] == '\n') {
+                                line[lineLength - 1] = '\0';
                             }
                         }
                     }
 
                     fgets(line, MAX_LINE - 1, fin);
 
-                    if (line[strlen(line) - 1] == '\n') {
-                        line[strlen(line) - 1] = '\0';
+                    lineLength = strlen(line);
+
+                    if (lineLength > 0 && line[lineLength - 1] == '\n') {
+                        line[lineLength - 1] = '\0';
                     }
                 }
             }
@@ -215,81 +323,95 @@ int main(int argc, char **argv)
         fclose(fin);
     }
 
-    /* ===== MENÚ ===== */
+    /*
+     * MENÚ PRINCIPAL
+     */
 
     do {
 
         printf("==== LEARNING MOTOR (Sprint 3) ====\n");
 
-        for (topicIndex = 1; topicIndex <= nTopics; topicIndex++) {
-            printf("%d) %s\n", topicIndex, topics[topicIndex].title);
+        for (currentTopicIndex = 1;
+             currentTopicIndex <= nTopics;
+             currentTopicIndex++) {
+
+            printf("%d) %s\n", currentTopicIndex,
+                   topics[currentTopicIndex].title);
         }
 
         printf("0) Exit\n");
+        printf("Select topic >> ");
         scanf("%d", &optionInt);
 
         if (optionInt == 0) {
+
             exitProgram = true;
+
         } else {
 
             if (optionInt >= 1 && optionInt <= nTopics) {
 
-                topicIndex = optionInt;
+                currentTopicIndex = optionInt;
 
-                for (exampleIndex = 1;
-                     exampleIndex <= topics[topicIndex].nExamples;
-                     exampleIndex++) {
+                printf("---- EXAMPLES ----\n");
 
-                    printf("%d) %s\n",
-                           exampleIndex,
-                           topics[topicIndex].examples[exampleIndex].title);
+                for (currentExampleIndex = 1;
+                     currentExampleIndex <=
+                         topics[currentTopicIndex].nExamples;
+                     currentExampleIndex++) {
+
+                    printf("%d) %s\n", currentExampleIndex,
+                            topics[currentTopicIndex]
+                            .examples[currentExampleIndex].title);
                 }
 
-                scanf("%d", &exampleIndex);
+                printf("Select example >> ");
+                scanf("%d", &optionInt);
 
-                if (exampleIndex >= 1 &&
-                    exampleIndex <= topics[topicIndex].nExamples) {
+                if (optionInt >= 1 &&
+                    optionInt <= topics[currentTopicIndex].nExamples) {
+
+                    currentExampleIndex = optionInt;
 
                     printf("---- DESCRIPTION ----\n");
 
-                    for (optionInt = 1;
-                         optionInt <= topics[topicIndex]
-                                           .examples[exampleIndex]
-                                           .nDescriptionLines;
-                         optionInt++) {
+                    for (lineIndex = 1;
+                         lineIndex <=
+                             topics[currentTopicIndex]
+                                 .examples[currentExampleIndex]
+                                 .nDescriptionLines;
+                         lineIndex++) {
 
                         printf("%s\n",
-                               topics[topicIndex]
-                                   .examples[exampleIndex]
-                                   .description[optionInt]);
+                               topics[currentTopicIndex]
+                                   .examples[currentExampleIndex]
+                                   .description[lineIndex]);
                     }
 
                     printf("---- PSEUDOCODE ----\n");
 
-                    for (optionInt = 1;
-                         optionInt <= topics[topicIndex]
-                                           .examples[exampleIndex]
-                                           .nPseudocodeLines;
-                         optionInt++) {
+                    for (lineIndex = 1;
+                         lineIndex <= topics[currentTopicIndex]
+                                 .examples[currentExampleIndex]
+                                 .nPseudocodeLines;
+                         lineIndex++) {
 
-                        printf("%s\n",
-                               topics[topicIndex]
-                                   .examples[exampleIndex]
-                                   .pseudocode[optionInt]);
+                        printf("%s\n", topics[currentTopicIndex]
+                                   .examples[currentExampleIndex]
+                                   .pseudocode[lineIndex]);
                     }
 
                     printf("---- C CODE ----\n");
 
-                    for (optionInt = 1;
-                         optionInt <= topics[topicIndex]
-                                           .examples[exampleIndex]
-                                           .nCLines;
-                         optionInt++) {
+                    for (lineIndex = 1;
+                         lineIndex <= topics[currentTopicIndex]
+                                 .examples[currentExampleIndex]
+                                 .nCLines; lineIndex++) {
 
                         printf("%s\n",
-                               topics[topicIndex]
-                                   .examples[exampleIndex]
-                                   .cCode[optionInt]);
+                               topics[currentTopicIndex]
+                                   .examples[currentExampleIndex]
+                                   .cCode[lineIndex]);
                     }
                 }
             }
