@@ -1,213 +1,428 @@
 TOPIC
-Records: basic concepts
+04. Basic data types in C
 
 EXAMPLE
-Declaring a record
+C program layout: headers, defines, types, main
 
-A record groups different data fields into a single structure.
-Each field can have a different data type.
-Records are used to represent real-world entities.
+C code is organized so that the compiler knows every type and constant before it is used. The theory places header files first (for example stdbool.h to enable bool), then compile-time constants with #define, then type declarations like typedef enum. Inside main, we declare runtime constants with const and then variables before the program body. This structure avoids “use before declaration” and makes code readable. We mirror the same idea in pseudocode using const/type/var blocks inside an algorithm.
 
 END_DESCRIPTION
 
+algorithm example1
+{We declare constants, types and variables before using them}
+const
+MAX_LEVEL: integer = 60;
+end const
+
 type
-    tPerson = record
-        name: string;
-        age: integer;
-    end record
+tHeroClass = {KNIGHT, MAGE, RANGER}
 end type
 
-algorithm example1
 var
-    p: tPerson;
+level: integer;
+heroClass: tHeroClass;
 end var
+
+level := 1;
+heroClass := KNIGHT;
 end algorithm
 
 END_PSEUDOCODE
 
-typedef struct {
-    char name[25];
-    int age;
-} tPerson;
+#include <stdio.h>
+#include <stdbool.h>
+
+/* Compile-time constant: replaced by the preprocessor before compilation */
+#define MAX_LEVEL 60
+
+/* Type declaration (available to the whole program) */
+typedef enum {KNIGHT, MAGE, RANGER} tHeroClass;
 
 int main() {
-    tPerson p;
-    return 0;
+
+/* Runtime constant: a constant object during execution */
+const int START_LEVEL = 1;
+
+/* Variable declarations (before other instructions) */
+int level;
+tHeroClass heroClass;
+
+/* Program body */
+level = START_LEVEL;
+heroClass = KNIGHT;
+
+return 0;
+
 }
 
 END_C
 
 EXAMPLE
-Accessing record fields
+Choosing primary C types for RPG stats
 
-Fields of a record are accessed using the dot operator.
-Each field can be read or written independently.
-
-END_DESCRIPTION
-
-p.name := "Alice";
-p.age := 30;
-
-END_PSEUDOCODE
-
-strcpy(p.name, "Alice");
-p.age = 30;
-
-END_C
-
-EXAMPLE
-Copying records
-
-In pseudocode, records can be copied directly.
-In C, each field must be copied manually.
+In C, each primary type is chosen by what kind of value we need to store. The theory maps: boolean -> bool (from stdbool.h), character -> char, integer -> int, real -> float. In a medieval RPG, level and gold are whole numbers, so int fits. Health may include decimals after calculations, so float fits. A class initial is one character, so char fits. A living flag is true/false, so bool fits. Picking the right type avoids wasted memory and avoids type errors later.
 
 END_DESCRIPTION
 
-p2 := p1;
+algorithm example2
+var
+level: integer;
+gold: integer;
+health: real;
+classInitial: char;
+isAlive: boolean;
+end var
+
+level := 12;
+gold := 150;
+health := 87.5;
+classInitial := 'M';
+isAlive := true;
+end algorithm
 
 END_PSEUDOCODE
 
-strcpy(p2.name, p1.name);
-p2.age = p1.age;
+#include <stdio.h>
+#include <stdbool.h>
 
-END_C
+int main() {
 
-END_TOPIC
+/* Variable declaration */
+int level;
+int gold;
+float health;
+char classInitial;
+bool isAlive;
 
+/* Program body */
+level = 12;
+gold = 150;
+health = 87.5f;
+classInitial = 'M';
+isAlive = true;
 
-TOPIC
-Records containing arrays
+return 0;
 
-EXAMPLE
-Record with an array field
-
-A record can contain arrays as fields.
-This allows storing multiple related values.
-
-END_DESCRIPTION
-
-type
-    tSubject = record
-        name: string;
-        marks: vector[5] of integer;
-    end record
-end type
-
-END_PSEUDOCODE
-
-typedef struct {
-    char name[25];
-    int marks[5];
-} tSubject;
-
-END_C
-
-EXAMPLE
-Accessing array elements in a record
-
-Array elements inside a record are accessed using index notation.
-
-END_DESCRIPTION
-
-subject.marks[1] := 8;
-
-END_PSEUDOCODE
-
-subject.marks[0] = 8;
-
-END_C
-
-EXAMPLE
-Traversing an array inside a record
-
-Loops can be used to process array fields inside records.
-
-END_DESCRIPTION
-
-i := 1;
-while i <= 5 do
-    writeInteger(subject.marks[i]);
-    i := i + 1;
-end while
-
-END_PSEUDOCODE
-
-for (i = 0; i < 5; i++) {
-    printf("%d\n", subject.marks[i]);
 }
-
 END_C
 
-END_TOPIC
-
-
-TOPIC
-Nested records
-
 EXAMPLE
-Record containing another record
+Identifier rules: valid names and common mistakes
 
-A record field can itself be another record.
-This allows hierarchical data structures.
+Identifiers name objects (variables, constants, types). The theory says C identifiers must start with a letter, then may contain letters, digits, or '_'. Spaces are not allowed, accents are not allowed, and keywords like const cannot be used. Using good names (like itemNumber) helps reading code, especially because C is case sensitive. This example shows correct and incorrect names; incorrect ones are kept commented so the file stays usable.
 
 END_DESCRIPTION
+algorithm example3
+{Pseudocode follows similar naming ideas: start with a letter, no spaces}
+var
+itemNumber: integer;
+aux2: integer;
+end var
 
+itemNumber := 3;
+aux2 := itemNumber + 1;
+
+{INCORRECTO: starts with '_' (not allowed by the theory rules for identifiers)}
+{ _item := 7; }
+
+{INCORRECTO: contains a space}
+{ item number := 10; }
+end algorithm
+END_PSEUDOCODE
+#include <stdio.h>
+#include <stdbool.h>
+
+int main() {
+
+
+/* Correct identifiers */
+int itemNumber;
+int aux2;
+
+itemNumber = 3;
+aux2 = itemNumber + 1;
+
+/* Incorrect identifiers (do not compile, kept commented) */
+/* int _item; */          /* INCORRECT: does not begin with an alphabetical character */
+/* int item number; */    /* INCORRECT: spaces are not allowed */
+/* int pieceCamión; */    /* INCORRECT: accents/special characters not allowed */
+/* int const; */          /* INCORRECT: keyword reserved in C */
+
+return 0;
+
+
+}
+END_C
+
+EXAMPLE
+Compile-time vs runtime constants: #define and const
+
+The theory explains two ways to define constants in C. With #define, the compiler replaces the name with the value during compilation (no type is written). With const, we create a typed constant object whose value is assigned at runtime. Both improve readability by avoiding “magic numbers”. In this example we use #define for a fixed rule (max inventory slots) and const for a runtime constant inside main (starting gold).
+
+END_DESCRIPTION
+algorithm example4
+const
+MAX_SLOTS: integer = 20;
+end const
+
+var
+slotsUsed: integer;
+gold: integer;
+end var
+
+slotsUsed := 0;
+gold := 25;
+end algorithm
+END_PSEUDOCODE
+#include <stdio.h>
+#include <stdbool.h>
+
+/* Compile-time constant */
+#define MAX_SLOTS 20
+
+int main() {
+
+
+/* Runtime constant (typed) */
+const int START_GOLD = 25;
+
+int slotsUsed;
+int gold;
+
+slotsUsed = 0;
+gold = START_GOLD;
+
+return 0;
+
+
+}
+END_C
+
+EXAMPLE
+Expressions in C: use extra parentheses to make intent clear
+
+Expressions in C follow the same evaluation ideas as in pseudocode, but the theory recommends adding parentheses if there is any doubt. This helps beginners and prevents logic errors when mixing operators. Here we calculate damage as base + bonus * multiplier and we also check a condition using comparisons and logical operators. Parentheses make the order of evaluation obvious.
+
+END_DESCRIPTION
+algorithm example5
+var
+base: integer;
+bonus: integer;
+multiplier: integer;
+damage: integer;
+
+
+level: integer;
+required: integer;
+hasKey: boolean;
+canEnter: boolean;
+
+
+end var
+
+base := 10;
+bonus := 4;
+multiplier := 3;
+
+damage := base + (bonus * multiplier);
+
+level := 8;
+required := 5;
+hasKey := true;
+
+canEnter := (level ≥ required) and hasKey;
+end algorithm
+END_PSEUDOCODE
+#include <stdio.h>
+#include <stdbool.h>
+
+int main() {
+
+
+int base;
+int bonus;
+int multiplier;
+int damage;
+
+int level;
+int required;
+bool hasKey;
+bool canEnter;
+
+base = 10;
+bonus = 4;
+multiplier = 3;
+
+damage = base + (bonus * multiplier);
+
+level = 8;
+required = 5;
+hasKey = true;
+
+canEnter = (level >= required) && hasKey;
+
+return 0;
+
+
+}
+END_C
+
+EXAMPLE
+Enumeration types in C: defining and using an RPG role
+
+C enumeration types let us represent a finite set of values (like hero roles). The theory’s syntax is typedef enum {value1, ...} name;. The order listed defines comparison order if we compare two enum values. We place the typedef between defines and main so it is visible everywhere. Then we declare a variable of that enum type inside main and assign one of its allowed values.
+
+END_DESCRIPTION
+algorithm example6
 type
-    tDate = record
-        day: integer;
-        month: integer;
-        year: integer;
-    end record
-
-    tPerson = record
-        name: string;
-        birth: tDate;
-    end record
+tRole = {SQUIRE, KNIGHT, PALADIN}
 end type
 
+var
+role: tRole;
+end var
+
+role := KNIGHT;
+end algorithm
 END_PSEUDOCODE
+#include <stdio.h>
+#include <stdbool.h>
 
-typedef struct {
-    int day;
-    int month;
-    int year;
-} tDate;
+/* Type declaration for a finite set of values */
+typedef enum {SQUIRE, KNIGHT, PALADIN} tRole;
 
-typedef struct {
-    char name[25];
-    tDate birth;
-} tPerson;
+int main() {
 
+
+tRole role;
+
+role = KNIGHT;
+
+return 0;
+
+
+}
 END_C
 
 EXAMPLE
-Accessing nested record fields
+Type conversions: explicit casts for mixed-type computations
 
-Nested fields are accessed using multiple dot operators.
+The theory recommends making conversions explicit in C, even if C could convert automatically, so the programmer’s intent is clear. To convert realToInteger we cast to (int). To convert integerToReal we cast to (float). For example, if we increase an integer gold value by a real tax factor, we first cast gold to float, compute, and then cast back to int if we need an integer result.
 
 END_DESCRIPTION
+algorithm example7
+var
+gold: integer;
+taxedGold: integer;
+end var
 
-person.birth.year := 2000;
+gold := 99;
 
+{Increase by 5%: need integerToReal, multiply, then realToInteger}
+taxedGold := realToInteger( integerToReal(gold) * 1.05 );
+end algorithm
 END_PSEUDOCODE
+#include <stdio.h>
+#include <stdbool.h>
 
-person.birth.year = 2000;
+int main() {
 
+
+int gold;
+int taxedGold;
+
+gold = 99;
+
+taxedGold = (int) ((float) gold * 1.05f);
+
+return 0;
+
+
+}
 END_C
 
 EXAMPLE
-Using nested records in algorithms
+Char and code conversions: rune codes for a lock
 
-Nested records help organize complex data clearly.
+Characters are stored as numeric codes internally (ASCII). The theory maps charToCode to (int) and codeToChar to (char). This is useful when we want to move to the “next” rune symbol by increasing its code. We store a rune as char, convert it to int to get its code, add 1, and convert back to char.
 
 END_DESCRIPTION
+algorithm example8
+var
+rune: char;
+runeCode: integer;
+nextRune: char;
+end var
 
-writeInteger(person.birth.day);
+rune := 'A';
 
+runeCode := charToCode(rune);
+nextRune := codeToChar(runeCode + 1);
+end algorithm
 END_PSEUDOCODE
+#include <stdio.h>
+#include <stdbool.h>
 
-printf("%d", person.birth.day);
+int main() {
 
+
+char rune;
+int runeCode;
+char nextRune;
+
+rune = 'A';
+
+runeCode = (int) rune;
+nextRune = (char) (runeCode + 1);
+
+return 0;
+
+
+}
+END_C
+
+EXAMPLE
+Assignment vs comparison in C: a dangerous beginner mistake
+
+In pseudocode, := is assignment and = is comparison, so they look different. In C, assignment uses = and comparison uses ==. The theory warns that C allows assignment inside expressions, so writing = by mistake inside a condition can change program behavior. Here we show the correct comparison, and we also show the incorrect line commented so it does not break compilation. This is a key checker-style pitfall.
+
+END_DESCRIPTION
+algorithm example9
+var
+level: integer;
+isBossRoom: boolean;
+end var
+
+level := 10;
+
+{Correct: comparison produces boolean}
+isBossRoom := (level = 10);
+
+{INCORRECTO: using assignment where a comparison is intended does not exist in pseudocode}
+{ isBossRoom := (level := 10); }
+end algorithm
+END_PSEUDOCODE
+#include <stdio.h>
+#include <stdbool.h>
+
+int main() {
+
+
+int level;
+bool isBossRoom;
+
+level = 10;
+
+/* Correct: comparison */
+isBossRoom = (level == 10);
+
+/* Incorrect: assignment instead of comparison (dangerous in conditions) */
+/* isBossRoom = (level = 10); */ /* This assigns 10 to level, not a comparison */
+
+return 0;
+
+
+}
 END_C
 
 END_TOPIC

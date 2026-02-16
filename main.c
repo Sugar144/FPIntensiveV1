@@ -2,53 +2,43 @@
 #include <string.h>
 #include <stdbool.h>
 
-/*
- * =========================================================
- * CONSTANTS
- * =========================================================
- */
-
 #define MAX_TOPICS 5
 #define MAX_EXAMPLES 10
 #define MAX_LINES 50
-#define MAX_LINE 514
-#define MAX_TITLE 100
-
+#define MAX_TEXT 512
 
 /*
- * =========================================================
+ * ============================
  * TYPES
- * =========================================================
+ * ============================
  */
 
 typedef struct {
-    char title[MAX_TITLE];
+    char title[MAX_TEXT];
 
-    char description[MAX_LINES][MAX_LINE];
+    char description[MAX_LINES][MAX_TEXT];
     int nDescriptionLines;
 
-    char pseudocode[MAX_LINES][MAX_LINE];
+    char pseudocode[MAX_LINES][MAX_TEXT];
     int nPseudocodeLines;
 
-    char cCode[MAX_LINES][MAX_LINE];
+    char cCode[MAX_LINES][MAX_TEXT];
     int nCLines;
 
 } tExample;
 
-
 typedef struct {
-    char title[MAX_TITLE];
+    char title[MAX_TEXT];
+
     tExample examples[MAX_EXAMPLES];
     int nExamples;
 
 } tTopic;
 
-
 /*
- * =========================================================
- * FUNCTION: isValidOption
- * =========================================================
- * Checks if an option is within range.
+ * ============================
+ * AUXILIARY FUNCTIONS
+ * ============================
  */
 
 bool isValidOption(int value, int maxValue)
@@ -64,129 +54,141 @@ bool isValidOption(int value, int maxValue)
     return valid;
 }
 
-
 /*
- * =========================================================
- * ACTION: loadExample
- * =========================================================
- * Reads one complete example from file.
- * Uses pointer to modify example directly.
+ * ============================
+ * LOAD EXAMPLE
+ * ============================
  */
 
 void loadExample(FILE *fin, tExample *example)
 {
-    char line[MAX_LINE];
+    char line[MAX_TEXT];
     int lineLength;
-
     int lineIndex;
 
-    /* ===== Read title ===== */
-    fgets(example->title, MAX_TITLE - 1, fin);
+    /* Read title */
+    fgets(example->title, MAX_TEXT - 1, fin);
+    example->title[MAX_TEXT - 1] = '\0';
 
-    lineLength = (int)strlen(example->title);
+    lineLength = strlen(example->title);
     if (lineLength > 0 && example->title[lineLength - 1] == '\n') {
         example->title[lineLength - 1] = '\0';
     }
 
-    /* ===== DESCRIPTION ===== */
+    /* DESCRIPTION */
     example->nDescriptionLines = 0;
 
-    fgets(line, MAX_LINE - 1, fin);
-    lineLength = (int)strlen(line);
+    fgets(line, MAX_TEXT - 1, fin);
+    line[MAX_TEXT - 1] = '\0';
+
+    lineLength = strlen(line);
     if (lineLength > 0 && line[lineLength - 1] == '\n') {
         line[lineLength - 1] = '\0';
     }
 
     while (strcmp(line, "END_DESCRIPTION") != 0) {
 
-        lineIndex = example->nDescriptionLines;
+        example->nDescriptionLines = example->nDescriptionLines + 1;
+        lineIndex = example->nDescriptionLines - 1;
 
-        strcpy(example->description[lineIndex], line);
+        if (lineIndex < MAX_LINES) {
+            strcpy(example->description[lineIndex], line);
+        }
 
-        example->nDescriptionLines++;
+        fgets(line, MAX_TEXT - 1, fin);
+        line[MAX_TEXT - 1] = '\0';
 
-        fgets(line, MAX_LINE - 1, fin);
-        lineLength = (int)strlen(line);
+        lineLength = strlen(line);
         if (lineLength > 0 && line[lineLength - 1] == '\n') {
             line[lineLength - 1] = '\0';
         }
     }
 
-    /* ===== PSEUDOCODE ===== */
+    /* PSEUDOCODE */
     example->nPseudocodeLines = 0;
 
-    fgets(line, MAX_LINE - 1, fin);
-    lineLength = (int)strlen(line);
+    fgets(line, MAX_TEXT - 1, fin);
+    line[MAX_TEXT - 1] = '\0';
+
+    lineLength = strlen(line);
     if (lineLength > 0 && line[lineLength - 1] == '\n') {
         line[lineLength - 1] = '\0';
     }
 
     while (strcmp(line, "END_PSEUDOCODE") != 0) {
 
-        lineIndex = example->nPseudocodeLines;
+        example->nPseudocodeLines = example->nPseudocodeLines + 1;
+        lineIndex = example->nPseudocodeLines - 1;
 
-        strcpy(example->pseudocode[lineIndex], line);
+        if (lineIndex < MAX_LINES) {
+            strcpy(example->pseudocode[lineIndex], line);
+        }
 
-        example->nPseudocodeLines++;
+        fgets(line, MAX_TEXT - 1, fin);
+        line[MAX_TEXT - 1] = '\0';
 
-        fgets(line, MAX_LINE - 1, fin);
-        lineLength = (int)strlen(line);
+        lineLength = strlen(line);
         if (lineLength > 0 && line[lineLength - 1] == '\n') {
             line[lineLength - 1] = '\0';
         }
     }
 
-    /* ===== C CODE ===== */
+    /* C CODE */
     example->nCLines = 0;
 
-    fgets(line, MAX_LINE - 1, fin);
-    lineLength = (int)strlen(line);
+    fgets(line, MAX_TEXT - 1, fin);
+    line[MAX_TEXT - 1] = '\0';
+
+    lineLength = strlen(line);
     if (lineLength > 0 && line[lineLength - 1] == '\n') {
         line[lineLength - 1] = '\0';
     }
 
     while (strcmp(line, "END_C") != 0) {
 
-        lineIndex = example->nCLines;
+        example->nCLines = example->nCLines + 1;
+        lineIndex = example->nCLines - 1;
 
-        strcpy(example->cCode[lineIndex], line);
+        if (lineIndex < MAX_LINES) {
+            strcpy(example->cCode[lineIndex], line);
+        }
 
-        example->nCLines++;
+        fgets(line, MAX_TEXT - 1, fin);
+        line[MAX_TEXT - 1] = '\0';
 
-        fgets(line, MAX_LINE - 1, fin);
-        lineLength = (int)strlen(line);
+        lineLength = strlen(line);
         if (lineLength > 0 && line[lineLength - 1] == '\n') {
             line[lineLength - 1] = '\0';
         }
     }
 }
 
-
 /*
- * =========================================================
- * ACTION: loadTopic
- * =========================================================
+ * ============================
+ * LOAD TOPIC
+ * ============================
  */
 
 void loadTopic(FILE *fin, tTopic *topic)
 {
-    char line[MAX_LINE];
+    char line[MAX_TEXT];
     int lineLength;
-
     int exampleIndex;
 
-    /* Read topic title */
-    fgets(topic->title, MAX_TITLE - 1, fin);
+    fgets(topic->title, MAX_TEXT - 1, fin);
+    topic->title[MAX_TEXT - 1] = '\0';
 
-    lineLength = (int)strlen(topic->title);
+    lineLength = strlen(topic->title);
     if (lineLength > 0 && topic->title[lineLength - 1] == '\n') {
         topic->title[lineLength - 1] = '\0';
     }
 
     topic->nExamples = 0;
 
-    fgets(line, MAX_LINE - 1, fin);
-    lineLength = (int)strlen(line);
+    fgets(line, MAX_TEXT - 1, fin);
+    line[MAX_TEXT - 1] = '\0';
+
+    lineLength = strlen(line);
     if (lineLength > 0 && line[lineLength - 1] == '\n') {
         line[lineLength - 1] = '\0';
     }
@@ -195,76 +197,133 @@ void loadTopic(FILE *fin, tTopic *topic)
 
         if (strcmp(line, "EXAMPLE") == 0) {
 
-            exampleIndex = topic->nExamples;
+            topic->nExamples = topic->nExamples + 1;
+            exampleIndex = topic->nExamples - 1;
 
-            loadExample(fin, &topic->examples[exampleIndex]);
-
-            topic->nExamples++;
+            if (exampleIndex < MAX_EXAMPLES) {
+                loadExample(fin, &topic->examples[exampleIndex]);
+            }
         }
 
-        fgets(line, MAX_LINE - 1, fin);
-        lineLength = (int)strlen(line);
+        fgets(line, MAX_TEXT - 1, fin);
+        line[MAX_TEXT - 1] = '\0';
+
+        lineLength = strlen(line);
         if (lineLength > 0 && line[lineLength - 1] == '\n') {
             line[lineLength - 1] = '\0';
         }
     }
 }
 
-
 /*
- * =========================================================
- * ACTION: loadTopicsFromFile
- * =========================================================
+ * ============================
+ * LOAD TOPICS FROM FILE
+ * ============================
  */
 
-void loadTopicsFromFile(char fileName[MAX_TITLE], tTopic topics[MAX_TOPICS],
-                        int *nTopics, bool *isRead)
+void loadTopicsFromFile(char fileName[MAX_TEXT],
+                        tTopic topics[MAX_TOPICS],
+                        int *nTopics,
+                        bool *isRead)
 {
     FILE *fin;
-    char line[MAX_LINE];
+    char line[MAX_TEXT];
     int lineLength;
     int topicIndex;
 
     fin = fopen(fileName, "r");
 
-    if (fin == NULL) {
-
-        *isRead = false;
-
-    } else {
+    if (fin != NULL) {
 
         *nTopics = 0;
 
-        while (fgets(line, MAX_LINE - 1, fin) != NULL) {
+        while (fgets(line, MAX_TEXT - 1, fin) != NULL) {
 
-            line[MAX_LINE - 1] = '\0';
-            
-            lineLength = (int)strlen(line);
+            line[MAX_TEXT - 1] = '\0';
+
+            lineLength = strlen(line);
             if (lineLength > 0 && line[lineLength - 1] == '\n') {
                 line[lineLength - 1] = '\0';
             }
 
             if (strcmp(line, "TOPIC") == 0) {
 
-                topicIndex = *nTopics;
+                *nTopics = *nTopics + 1;
+                topicIndex = *nTopics - 1;
 
-                loadTopic(fin, &topics[topicIndex]);
-
-                (*nTopics)++;
+                if (topicIndex < MAX_TOPICS) {
+                    loadTopic(fin, &topics[topicIndex]);
+                }
             }
-            
         }
 
         fclose(fin);
         *isRead = true;
+
+    } else {
+        *isRead = false;
     }
 }
 
+/*
+ * ============================
+ * SHOW EXAMPLE
+ * ============================
+ */
+
+void showExampleContent(tExample example)
+{
+    int lineIndex;
+
+    printf("---- DESCRIPTION ----\n");
+    for (lineIndex = 0; lineIndex < example.nDescriptionLines; lineIndex++) {
+        printf("%s\n", example.description[lineIndex]);
+    }
+
+    printf("---- PSEUDOCODE ----\n");
+    for (lineIndex = 0; lineIndex < example.nPseudocodeLines; lineIndex++) {
+        printf("%s\n", example.pseudocode[lineIndex]);
+    }
+
+    printf("---- C CODE ----\n");
+    for (lineIndex = 0; lineIndex < example.nCLines; lineIndex++) {
+        printf("%s\n", example.cCode[lineIndex]);
+    }
+}
 
 /*
- * =========================================================
+ * ============================
+ * SHOW EXAMPLES MENU
+ * ============================
+ */
+
+void showExamplesMenu(tTopic topic)
+{
+    int optionInt;
+    int exampleIndex;
+
+    printf("---- EXAMPLES ----\n");
+
+    for (exampleIndex = 0; exampleIndex < topic.nExamples; exampleIndex++) {
+        printf("%d) %s\n", exampleIndex + 1, topic.examples[exampleIndex].title);
+    }
+
+    printf("Select example >> ");
+    scanf("%d", &optionInt);
+    getchar();
+
+    if (isValidOption(optionInt, topic.nExamples)) {
+        exampleIndex = optionInt - 1;
+        showExampleContent(topic.examples[exampleIndex]);
+    } else {
+        printf("INVALID OPTION\n");
+    }
+}
+
+/*
+ * ============================
  * MAIN
- * =========================================================
+ * ============================
  */
 
 int main(void)
@@ -276,15 +335,11 @@ int main(void)
     bool exitProgram;
 
     int optionInt;
-
     int topicIndex;
-    int exampleIndex;
-    int lineIndex;
 
-    tTopic currentTopic;
-    tExample currentExample;
+    char fileName[MAX_TEXT];
 
-    char fileName[MAX_TITLE];
+    exitProgram = false;
 
     printf("LOAD TOPICS FROM FILE >> ");
     scanf("%s", fileName);
@@ -292,13 +347,7 @@ int main(void)
 
     loadTopicsFromFile(fileName, topics, &nTopics, &isRead);
 
-    if (isRead == false) {
-
-        printf("ERROR loading file\n");
-
-    } else {
-
-        exitProgram = false;
+    if (isRead == true) {
 
         do {
 
@@ -322,64 +371,19 @@ int main(void)
                 if (isValidOption(optionInt, nTopics)) {
 
                     topicIndex = optionInt - 1;
-                    currentTopic = topics[topicIndex];
+                    showExamplesMenu(topics[topicIndex]);
 
-                    printf("---- EXAMPLES ----\n");
+                } else {
 
-                    for (exampleIndex = 0;
-                         exampleIndex < currentTopic.nExamples;
-                         exampleIndex++) {
-
-                        printf("%d) %s\n",
-                               exampleIndex + 1,
-                               currentTopic.examples[exampleIndex].title);
-                    }
-
-                    printf("Select example >> ");
-                    scanf("%d", &optionInt);
-                    getchar();
-
-                    if (isValidOption(optionInt,
-                                      currentTopic.nExamples)) {
-
-                        exampleIndex = optionInt - 1;
-                        currentExample =
-                            currentTopic.examples[exampleIndex];
-
-                        printf("---- DESCRIPTION ----\n");
-
-                        for (lineIndex = 0;
-                             lineIndex < currentExample.nDescriptionLines;
-                             lineIndex++) {
-
-                            printf("%s\n",
-                                   currentExample.description[lineIndex]);
-                        }
-
-                        printf("---- PSEUDOCODE ----\n");
-
-                        for (lineIndex = 0;
-                             lineIndex < currentExample.nPseudocodeLines;
-                             lineIndex++) {
-
-                            printf("%s\n",
-                                   currentExample.pseudocode[lineIndex]);
-                        }
-
-                        printf("---- C CODE ----\n");
-
-                        for (lineIndex = 0;
-                             lineIndex < currentExample.nCLines;
-                             lineIndex++) {
-
-                            printf("%s\n",
-                                   currentExample.cCode[lineIndex]);
-                        }
-                    }
+                    printf("INVALID OPTION\n");
                 }
             }
 
         } while (exitProgram == false);
+
+    } else {
+
+        printf("ERROR: unable to load file\n");
     }
 
     return 0;
